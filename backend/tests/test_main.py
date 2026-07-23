@@ -1,29 +1,39 @@
-import json
-from types import SimpleNamespace
-
 from fastapi.testclient import TestClient
 
-import main
+from app.api.dependencies import get_judge_service
+from app.gateways.base import BaseAIGateway
+from app.main import app
+from app.repositories.in_memory import InMemoryJudgeRepository
+from app.schemas.judge import JudgeScore
+from app.services.judge_service import JudgeService
 
 
-def test_judge_boke_returns_total_score_and_judges(monkeypatch):
-    fake_response_text = json.dumps(
-        {
-            "judges": [
-                {"judge": "審査員A", "score": 8, "comment": "面白い"},
-                {"judge": "審査員B", "score": 6, "comment": "まあまあ"},
-            ]
-        }
+class FakeGateway(BaseAIGateway):
+    def judge(self, odai: str, answer: str) -> list[JudgeScore]:
+        return [
+            JudgeScore(judge="審査員A", score=8, comment="面白い"),
+            JudgeScore(judge="審査員B", score=6, comment="まあまあ"),
+        ]
+
+
+def build_client() -> TestClient:
+    service = JudgeService(
+        gateway=FakeGateway(),
+        repository=InMemoryJudgeRepository(),
     )
+    app.dependency_overrides[get_judge_service] = lambda: service
+    return TestClient(app)
 
-    def fake_generate_content(**kwargs):
-        return SimpleNamespace(text=fake_response_text)
 
-    monkeypatch.setattr(main.client.models, "generate_content", fake_generate_content)
+def teardown_function() -> None:
+    app.dependency_overrides.clear()
 
-    client = TestClient(main.app)
+
+def test_create_judgement_returns_total_and_judges():
+    client = build_client()
+
     response = client.post(
-        "/api/judge",
+        "/api/v1/judge",
         json={"odai": "こんな寿司屋は嫌だ", "answer": "ネタが全部わさび"},
     )
 
@@ -31,18 +41,26 @@ def test_judge_boke_returns_total_score_and_judges(monkeypatch):
     data = response.json()
     assert data["total_score"] == 14
     assert len(data["judges"]) == 2
+    assert data["id"]
 
 
-def test_judge_boke_returns_502_on_invalid_json(monkeypatch):
-    def fake_generate_content(**kwargs):
-        return SimpleNamespace(text="not a json")
+def test_get_judgement_roundtrip():
+    client = build_client()
 
-    monkeypatch.setattr(main.client.models, "generate_content", fake_generate_content)
+    created = client.post(
+        "/api/v1/judge",
+        json={"odai": "お題", "answer": "回答"},
+    ).json()
 
-    client = TestClient(main.app)
-    response = client.post(
-        "/api/judge",
-        json={"odai": "こんな寿司屋は嫌だ", "answer": "ネタが全部わさび"},
-    )
+    fetched = client.get(f"/api/v1/judge/{created['id']}")
 
-    assert response.status_code == 502
+    assert fetched.status_code == 200
+    assert fetched.json()["id"] == created["id"]
+
+
+def test_get_judgement_not_found():
+    client = build_client()
+
+    response = client.get("/api/v1/judge/does-not-exist")
+
+    assert response.status_code == 404

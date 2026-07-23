@@ -238,3 +238,7 @@ next-env.d.ts
 .env.production.local
 backend/.env
 frontend/.env.local
+
+# Frontend source (Python向けの汎用パターンによる誤除外を打ち消す)
+!frontend/src/lib/
+!frontend/src/lib/**
