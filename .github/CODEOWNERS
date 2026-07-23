@@ -1,0 +1,15 @@
+# CODEOWNERS
+# 各パスに対応するレビュー担当者を指定します。
+# @で始まるGitHubユーザー名、または @org/team 形式のチーム名に置き換えてください。
+
+# デフォルト（他のルールにマッチしないすべてのファイル）
+* @tanshiotan
+
+# バックエンド（FastAPI）
+/backend/ @tanshiotan
+
+# フロントエンド（Next.js）
+/frontend/ @tanshiotan
+
+# CI/CD・GitHub運用まわり
+/.github/ @tanshiotan
