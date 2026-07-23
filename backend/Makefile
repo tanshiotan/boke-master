@@ -1,7 +1,10 @@
-.PHONY: fmt lint test openapi
+.PHONY: fmt fmt-check lint test openapi
 
 fmt:
 	ruff format .
+
+fmt-check:
+	ruff format --check .
 
 lint:
 	ruff check .
