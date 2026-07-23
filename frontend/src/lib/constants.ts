@@ -1,5 +1,6 @@
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// 既定は空文字で同一オリジンへ送りnext.config.tsのrewritesでFastAPIへ中継する
+// NEXT_PUBLIC_API_URLを設定した場合はプロキシを介さず直接そのURLへ送る
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 export const API_V1_PREFIX = "/api/v1";
 
