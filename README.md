@@ -44,6 +44,8 @@ npm run dev                          # http://localhost:3000
 | `GEMINI_API_KEY` | Gemini APIキー（本番採点時に必須） | なし |
 | `USE_MOCK_AI` | `true` でモックAIに切り替え | `false` |
 | `RATE_LIMIT_PER_MINUTE` | 同一IPあたりの1分間の採点回数上限 | `10` |
+| `ALLOWED_ORIGINS` | CORSで許可するオリジン（カンマ区切り） | `http://localhost:3000` |
+| `NEXT_PUBLIC_API_URL` | フロントエンドが参照するバックエンドのURL | `http://localhost:8000` |
 
 ## モックモード（USE_MOCK_AI=true）
 
@@ -80,6 +82,25 @@ npx tsc --noEmit
 cd backend && make openapi                                  # backend/openapi.json を生成
 cd frontend && npx openapi-typescript ../backend/openapi.json -o src/types/schema.ts
 ```
+
+## Renderへのデプロイ
+
+リポジトリ直下の `render.yaml` に、バックエンドとフロントエンドの2サービス分の設定をまとめています。Render のダッシュボードで **New → Blueprint** を選び、このリポジトリを指定すると2つの Web Service が同時に作成されます。
+
+作成後、以下の3つの環境変数だけは Render の画面から手動で設定してください（値がシークレット、または相手側のURLが確定してから決まるため）。
+
+| サービス | 変数 | 設定する値 |
+| --- | --- | --- |
+| boke-master-api | `GEMINI_API_KEY` | Gemini APIキー |
+| boke-master-api | `ALLOWED_ORIGINS` | フロントエンドのURL（例: `https://boke-master-web.onrender.com`） |
+| boke-master-web | `NEXT_PUBLIC_API_URL` | バックエンドのURL（例: `https://boke-master-api.onrender.com`） |
+
+### 注意点
+
+- `ALLOWED_ORIGINS` は末尾のスラッシュを付けないでください。完全一致で比較するため、付いているとCORSエラーになります。
+- `NEXT_PUBLIC_API_URL` はビルド時にコードへ埋め込まれます。値を変更したら **Clear build cache & deploy** で再ビルドしてください。
+- 無料プランでは15分アクセスがないとサービスが停止し、次回アクセス時の起動に30〜60秒かかります。
+- バックエンドの疎通確認は `https://<バックエンドのURL>/health` で行えます。
 
 ## ライセンス
 
