@@ -5,7 +5,13 @@ import json
 from google import genai
 from google.genai import types
 
-from app.core.constants import GEMINI_MODEL, JUDGES, SCORE_MAX, SCORE_MIN
+from app.core.constants import (
+    COMMENT_MAX_LENGTH,
+    GEMINI_MODEL,
+    JUDGES,
+    SCORE_MAX,
+    SCORE_MIN,
+)
 from app.core.exceptions import AIGatewayError, JudgeParseError
 from app.core.logging import get_logger
 from app.gateways.base import BaseAIGateway
@@ -36,8 +42,10 @@ class GeminiGateway(BaseAIGateway):
 
     def _build_prompt(self, odai: str, answer: str) -> str:
         judges_block = "\n".join(f"- {name}" for name in JUDGES)
+        score_rule = f"{SCORE_MIN}から{SCORE_MAX}の整数"
+        comment_rule = f"{COMMENT_MAX_LENGTH}文字以内の短評"
         return f"""あなたは大喜利の審査員団です。以下の5人の審査員それぞれの視点で、
-お題に対する回答を{SCORE_MAX}点満点で採点し、短いコメントを付けてください。
+お題に対する回答を{SCORE_MAX}点満点で採点し、ごく短いコメント（{COMMENT_MAX_LENGTH}文字以内）を付けてください。
 
 審査員一覧:
 {judges_block}
@@ -48,7 +56,7 @@ class GeminiGateway(BaseAIGateway):
 以下のJSON形式のみで出力してください（説明文は不要）:
 {{
   "judges": [
-    {{"judge": "審査員名", "score": {SCORE_MIN}から{SCORE_MAX}の整数, "comment": "短評"}}
+    {{"judge": "審査員名", "score": {score_rule}, "comment": "{comment_rule}"}}
   ]
 }}
 """
