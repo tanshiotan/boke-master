@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: boke-master-api
+    runtime: python
+    plan: free
+    region: singapore
+    branch: main
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      # 実値はRenderの画面で設定する
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: USE_MOCK_AI
+        value: "false"
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "10"
+      # フロントのURLをhttps付きで設定する 末尾スラッシュは付けない
+      - key: ALLOWED_ORIGINS
+        sync: false
+
+  - type: web
+    name: boke-master-web
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start -- --port $PORT
+    envVars:
+      - key: NODE_VERSION
+        value: 20.19.0
+      # バックエンドのURLを設定する ビルド時に埋め込まれるため変更後は再ビルドが必要
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
