@@ -52,7 +52,9 @@ export default function ResultPage() {
 
             <section className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm dark:bg-zinc-900">
               <div className="text-center">
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">合計点</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  合計点
+                </p>
                 <p className="text-4xl font-bold text-black dark:text-zinc-50">
                   {result.total_score}
                   <span className="text-lg font-normal text-zinc-500 dark:text-zinc-400">

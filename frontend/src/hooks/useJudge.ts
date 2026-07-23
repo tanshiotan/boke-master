@@ -25,7 +25,9 @@ export function useJudge(): UseJudge {
       try {
         return await postJudge(odai, answer, token);
       } catch {
-        setError("採点中にエラーが発生しました。時間をおいて再度お試しください。");
+        setError(
+          "採点中にエラーが発生しました。時間をおいて再度お試しください。",
+        );
         return null;
       } finally {
         setIsLoading(false);

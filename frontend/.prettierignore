@@ -1,0 +1,8 @@
+.next
+node_modules
+out
+package-lock.json
+
+# Next.jsが管理する生成ブロックのため対象外
+AGENTS.md
+CLAUDE.md
