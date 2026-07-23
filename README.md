@@ -46,6 +46,7 @@ npm run dev                          # http://localhost:3000
 | `RATE_LIMIT_PER_MINUTE` | 同一IPあたりの1分間の採点回数上限 | `10` |
 | `ALLOWED_ORIGINS` | CORSで許可するオリジン（カンマ区切り） | `http://localhost:3000` |
 | `NEXT_PUBLIC_API_URL` | フロントエンドが参照するバックエンドのURL | `http://localhost:8000` |
+| `BACKEND_API_URL` | Next.js経由（プロキシ）で通信する際のバックエンドURL | `http://localhost:8000` |
 
 ## モックモード
 
