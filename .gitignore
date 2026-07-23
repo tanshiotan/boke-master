@@ -231,13 +231,10 @@ next-env.d.ts
 .vercel
 
 # Environment variables (secrets)
+# スラッシュを含まないパターンは全階層に適用されるためサブディレクトリ配下も除外される
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-backend/.env
-frontend/.env.local
+.env.*
+!.env.example
 
 # Frontend source (Python向けの汎用パターンによる誤除外を打ち消す)
 !frontend/src/lib/

@@ -14,6 +14,9 @@ MOCK_COMMENT: str = "モック審査員による固定コメントです"
 
 GEMINI_MODEL: str = "gemini-flash-latest"
 
-ALLOWED_ORIGINS: list[str] = ["http://localhost:3000"]
+DEFAULT_ALLOWED_ORIGINS: list[str] = ["http://localhost:3000"]
+ORIGIN_SEPARATOR: str = ","
+
+HEALTH_STATUS_OK: str = "ok"
 
 API_V1_PREFIX: str = "/api/v1"
