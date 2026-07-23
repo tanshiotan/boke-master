@@ -9,6 +9,9 @@ JUDGES: list[str] = [
 SCORE_MIN: int = 0
 SCORE_MAX: int = 10
 
+MOCK_SCORE: int = 8
+MOCK_COMMENT: str = "モック審査員による固定コメントです"
+
 GEMINI_MODEL: str = "gemini-flash-latest"
 
 ALLOWED_ORIGINS: list[str] = ["http://localhost:3000"]
