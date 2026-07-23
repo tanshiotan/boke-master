@@ -21,6 +21,11 @@ class JudgeParseError(AppError):
     message = "採点結果の解析に失敗しました"
 
 
+class ConfigError(AppError):
+    status_code = 500
+    message = "サーバー設定が不正です"
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(AppError)
     async def handle_app_error(request: Request, exc: AppError) -> JSONResponse:

@@ -13,9 +13,7 @@ def make_gateway() -> GeminiGateway:
 
 def test_parse_valid_json():
     gateway = make_gateway()
-    text = json.dumps(
-        {"judges": [{"judge": "A", "score": 5, "comment": "ok"}]}
-    )
+    text = json.dumps({"judges": [{"judge": "A", "score": 5, "comment": "ok"}]})
 
     scores = gateway._parse(text)
 
