@@ -12,7 +12,9 @@ SCORE_MAX: int = 10
 MOCK_SCORE: int = 8
 MOCK_COMMENT: str = "モック審査員による固定コメントです"
 
-GEMINI_MODEL: str = "gemini-flash-latest"
+GEMINI_MODEL: str = "gemini-2.5-flash"
+
+COMMENT_MAX_LENGTH: int = 20
 
 DEFAULT_ALLOWED_ORIGINS: list[str] = ["http://localhost:3000"]
 ORIGIN_SEPARATOR: str = ","
