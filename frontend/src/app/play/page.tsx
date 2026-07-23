@@ -5,6 +5,7 @@ import { Suspense, useState } from "react";
 
 import { useJudge } from "@/hooks/useJudge";
 import { ODAI_LIST } from "@/lib/constants";
+import { notifyError } from "@/lib/toast";
 
 function PlayForm() {
   const router = useRouter();
@@ -21,7 +22,9 @@ function PlayForm() {
     const response = await submitJudge(odai, answer);
     if (response) {
       router.push(`/result/${response.id}`);
+      return;
     }
+    notifyError();
   };
 
   return (
