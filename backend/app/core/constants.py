@@ -12,14 +12,21 @@ SCORE_MAX: int = 10
 MOCK_SCORE: int = 8
 MOCK_COMMENT: str = "モック審査員による固定コメントです"
 
-# 上から順に試行し利用制限に達したら次のモデルへフォールバックする
+# 上から順に試行し利用不可なら次のモデルへフォールバックする
 GEMINI_MODELS: list[str] = [
     "gemini-flash-latest",
-    "gemini-2.5-flash",
-    "gemini-2.0-flash",
+    "gemini-3.5-flash",
+    "gemini-flash-lite-latest",
+    "gemini-3.1-flash-lite",
 ]
 
 HTTP_STATUS_TOO_MANY_REQUESTS: int = 429
+HTTP_STATUS_NOT_FOUND: int = 404
+
+# 利用制限とモデル未提供はAPIキーごとに異なるため次のモデルで再試行する
+GEMINI_FALLBACK_STATUSES: frozenset[int] = frozenset(
+    {HTTP_STATUS_TOO_MANY_REQUESTS, HTTP_STATUS_NOT_FOUND}
+)
 
 COMMENT_MAX_LENGTH: int = 20
 
