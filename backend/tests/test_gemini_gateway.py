@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import pytest
 from google.genai import errors
 
-from app.core.constants import HTTP_STATUS_TOO_MANY_REQUESTS
+from app.core.constants import HTTP_STATUS_NOT_FOUND, HTTP_STATUS_TOO_MANY_REQUESTS
 from app.core.exceptions import AIGatewayError, JudgeParseError
 from app.gateways.gemini import GeminiGateway
 
@@ -71,6 +71,29 @@ def test_falls_back_to_next_model_on_rate_limit(monkeypatch):
     scores = gateway.judge("お題", "回答")
 
     assert models.called_models == [MODELS[0], MODELS[1]]
+    assert len(scores) == 1
+
+
+def test_falls_back_to_next_model_on_not_found(monkeypatch):
+    unavailable = {MODELS[0]: make_client_error(HTTP_STATUS_NOT_FOUND)}
+    gateway, models = make_gateway_with_errors(monkeypatch, unavailable)
+
+    scores = gateway.judge("お題", "回答")
+
+    assert models.called_models == [MODELS[0], MODELS[1]]
+    assert len(scores) == 1
+
+
+def test_falls_back_across_rate_limit_and_not_found(monkeypatch):
+    mixed = {
+        MODELS[0]: make_client_error(HTTP_STATUS_TOO_MANY_REQUESTS),
+        MODELS[1]: make_client_error(HTTP_STATUS_NOT_FOUND),
+    }
+    gateway, models = make_gateway_with_errors(monkeypatch, mixed)
+
+    scores = gateway.judge("お題", "回答")
+
+    assert models.called_models == MODELS
     assert len(scores) == 1
 
 

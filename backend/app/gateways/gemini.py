@@ -7,8 +7,8 @@ from google.genai import errors, types
 
 from app.core.constants import (
     COMMENT_MAX_LENGTH,
+    GEMINI_FALLBACK_STATUSES,
     GEMINI_MODELS,
-    HTTP_STATUS_TOO_MANY_REQUESTS,
     JUDGES,
     SCORE_MAX,
     SCORE_MIN,
@@ -42,9 +42,11 @@ class GeminiGateway(BaseAIGateway):
                     ),
                 )
             except errors.ClientError as exc:
-                if exc.code != HTTP_STATUS_TOO_MANY_REQUESTS:
+                if exc.code not in GEMINI_FALLBACK_STATUSES:
                     raise AIGatewayError() from exc
-                logger.warning("利用制限のためモデルを切り替えます model=%s", model)
+                logger.warning(
+                    "モデルを利用できないため切り替えます model=%s status=%s", model, exc.code
+                )
                 last_error = exc
                 continue
             except Exception as exc:
@@ -53,7 +55,7 @@ class GeminiGateway(BaseAIGateway):
             logger.info("AI採点に成功しました model=%s", model)
             return response.text
 
-        logger.error("すべてのモデルが利用制限に達しました")
+        logger.error("すべてのモデルを利用できませんでした")
         raise AIGatewayError() from last_error
 
     def _build_prompt(self, odai: str, answer: str) -> str:
