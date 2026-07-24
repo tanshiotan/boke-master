@@ -3,11 +3,12 @@ from __future__ import annotations
 import json
 
 from google import genai
-from google.genai import types
+from google.genai import errors, types
 
 from app.core.constants import (
     COMMENT_MAX_LENGTH,
-    GEMINI_MODEL,
+    GEMINI_MODELS,
+    HTTP_STATUS_TOO_MANY_REQUESTS,
     JUDGES,
     SCORE_MAX,
     SCORE_MIN,
@@ -26,19 +27,34 @@ class GeminiGateway(BaseAIGateway):
 
     def judge(self, odai: str, answer: str) -> list[JudgeScore]:
         prompt = self._build_prompt(odai, answer)
+        return self._parse(self._generate(prompt))
 
-        try:
-            response = self._client.models.generate_content(
-                model=GEMINI_MODEL,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                ),
-            )
-        except Exception as exc:
-            raise AIGatewayError() from exc
+    def _generate(self, prompt: str) -> str | None:
+        last_error: Exception | None = None
 
-        return self._parse(response.text)
+        for model in GEMINI_MODELS:
+            try:
+                response = self._client.models.generate_content(
+                    model=model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                    ),
+                )
+            except errors.ClientError as exc:
+                if exc.code != HTTP_STATUS_TOO_MANY_REQUESTS:
+                    raise AIGatewayError() from exc
+                logger.warning("利用制限のためモデルを切り替えます model=%s", model)
+                last_error = exc
+                continue
+            except Exception as exc:
+                raise AIGatewayError() from exc
+
+            logger.info("AI採点に成功しました model=%s", model)
+            return response.text
+
+        logger.error("すべてのモデルが利用制限に達しました")
+        raise AIGatewayError() from last_error
 
     def _build_prompt(self, odai: str, answer: str) -> str:
         judges_block = "\n".join(f"- {name}" for name in JUDGES)
